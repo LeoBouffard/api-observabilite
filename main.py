@@ -82,9 +82,11 @@ class Health(BaseModel):
     metadata: MetaData
     data: HealthData
 
-@app.get("/info", response_model=Info, tags=["observabilité", "gouvernance"])
-async def get_info():
-    # Exemple de données pour la réponse
+from fastapi.responses import Response
+import yaml
+
+@app.get("/info.yaml", response_class=Response, tags=["observabilité", "gouvernance"])
+async def get_info_yaml():
     info_si = InfoSi(nom="ROC NG", trigramme="SCL", version="2.3.1")
     info_data = InfoData(
         infoSi=info_si,
@@ -100,7 +102,10 @@ async def get_info():
         dateFinHomologation=datetime(2024, 7, 21),
     )
     metadata = MetaData(versionApi="1.0.2")
-    return Info(metadata=metadata, data=info_data)
+    info = Info(metadata=metadata, data=info_data)
+
+    yaml_data = yaml.dump(info.model_dump(), allow_unicode=True, sort_keys=False)
+    return Response(content=yaml_data, media_type="application/x-yaml")
 
 @app.get("/health", response_model=Health, tags=["observabilité", "statut", "supervision"])
 async def get_health():
@@ -111,11 +116,20 @@ async def get_health():
     ]
     health_data = HealthData(statut="UP", infoSi=info_si, services=services)
     metadata = MetaData(versionApi="1.0.2")
-    return Health(metadata=metadata, data=health_data)
+
+    health = Health(metadata=metadata, data=health_data)
+    yaml_data = yaml.dump(health.model_dump(), allow_unicode=True)
+    return Response(content=yaml_data, media_type="application/x-yaml")
 
 @app.exception_handler(HTTPException)
-async def custom_http_exception_handler(request, exc):
-    return {"message": "Erreur interne", "details": str(exc)}
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    error_content = {
+        "message": "Erreur interne",
+        "details": str(exc.detail)
+    }
+    yaml_error = yaml.dump(error_content, allow_unicode=True, sort_keys=False)
+    return Response(content=yaml_error, media_type="application/x-yaml", status_code=exc.status_code)
+
 
 # Lancer l'API avec Uvicorn
 # uvicorn app:app --reload
