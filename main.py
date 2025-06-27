@@ -107,7 +107,7 @@ async def get_info_yaml():
     yaml_data = yaml.dump(info.dict(), allow_unicode=True, sort_keys=False)
     return Response(content=yaml_data, media_type="application/x-yaml")
 
-@app.get("/health", response_model=Health, tags=["observabilité", "statut", "supervision"])
+@app.get("/health.yaml", response_model=Health, tags=["observabilité", "statut", "supervision"])
 async def get_health():
     # Exemple de données pour la réponse
     info_si = InfoSi(nom="ROC NG", trigramme="SCL", version="2.3.1")
