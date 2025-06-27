@@ -104,7 +104,7 @@ async def get_info_yaml():
     metadata = MetaData(versionApi="1.0.2")
     info = Info(metadata=metadata, data=info_data)
 
-    yaml_data = yaml.dump(info.model_dump(), allow_unicode=True, sort_keys=False)
+    yaml_data = yaml.dump(info.dict(), allow_unicode=True, sort_keys=False)
     return Response(content=yaml_data, media_type="application/x-yaml")
 
 @app.get("/health", response_model=Health, tags=["observabilité", "statut", "supervision"])
@@ -118,7 +118,7 @@ async def get_health():
     metadata = MetaData(versionApi="1.0.2")
 
     health = Health(metadata=metadata, data=health_data)
-    yaml_data = yaml.dump(health.model_dump(), allow_unicode=True)
+    yaml_data = yaml.dump(health.dict(), allow_unicode=True)
     return Response(content=yaml_data, media_type="application/x-yaml")
 
 @app.exception_handler(HTTPException)
