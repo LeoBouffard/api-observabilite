@@ -40,6 +40,18 @@ class Mention(str, Enum):
     CRYPTO = "CRYPTO"
     CCI = "CCI"
 
+# Conversion manuelle ou nettoyage du modèle
+def clean_enums(obj):
+    if isinstance(obj, Enum):
+        return obj.value
+    elif isinstance(obj, list):
+        return [clean_enums(item) for item in obj]
+    elif isinstance(obj, dict):
+        return {key: clean_enums(value) for key, value in obj.items()}
+    else:
+        return obj
+
+
 class InfoSi(BaseModel):
     nom: str
     trigramme: str
@@ -104,7 +116,7 @@ async def get_info_yaml():
     metadata = MetaData(versionApi="1.0.2")
     info = Info(metadata=metadata, data=info_data)
 
-    yaml_data = yaml.dump(info.dict(), allow_unicode=True, sort_keys=False)
+    yaml_data = yaml.dump(clean_enums(info.dict()), allow_unicode=True, sort_keys=False)
     return Response(content=yaml_data, media_type="application/x-yaml")
 
 @app.get("/health.yaml", response_model=Health, tags=["observabilité", "statut", "supervision"])
@@ -118,7 +130,7 @@ async def get_health():
     metadata = MetaData(versionApi="1.0.2")
 
     health = Health(metadata=metadata, data=health_data)
-    yaml_data = yaml.dump(health.dict(), allow_unicode=True)
+    yaml_data = yaml.dump(clean_enums(health.dict()), allow_unicode=True)
     return Response(content=yaml_data, media_type="application/x-yaml")
 
 @app.exception_handler(HTTPException)
