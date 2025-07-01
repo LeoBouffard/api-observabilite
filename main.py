@@ -93,7 +93,7 @@ async def get_info_yaml():
         dateVersion=datetime.now(),
         environnement="production",
         classificationMaxDonnees="DR",
-        mentions=[Mention.CP],
+        # mentions=[Mention.CP],
         niveauArr="I3",
         niveauService="infogerance",
         directionSystemeInformation="SCL",
